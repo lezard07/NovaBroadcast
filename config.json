@@ -1,0 +1,47 @@
+{
+    "bot": {
+        "tokens": [
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+    "activity": {
+        "name": "Powered By NovaCodes™",
+        "type": "STREAMING",
+        "url": "https://www.twitch.tv/nochannel",
+        "status": "idle"
+        }
+    },
+    "server": {
+        "guildId": "1373311613465268284",
+        "bcRoleId": "1378835197633626264",
+        "reportChannelId": "1385068365504053310"
+    },
+    "colors": {
+        "main": "#FFFFFF",
+        "success": "#57F287",
+        "warning": "#FEE75C",
+        "error": "#ED4245",
+        "canceled": "#5D5D5D"
+    },
+    "emojis": {
+        "dot": "<:wdot:1524131703482876004>",
+        "bot": "<:bot:1538926828201451530>",
+        "time": "<:time:1538927187636264990>",
+        "speed": "<a:fast:1524191150486065250>",
+        "right": "<:right:1524196722056626217>",
+        "less": "<:less:1524194424303783976>",
+        "cancel": "<:can:1524196158958997514>",
+        "msg": "<:msg:1538676123968213083>",
+        "emmsg": "<:emmsg:1538676168679489619>",
+        "members": "<:members:1524191804151431378>",
+        "online": "<a:true_:1538681829509300274>",
+        "offline": "<a:False:1538681929056911491>",
+        "done": "<:done:1524196922963918858>",
+        "broadcast": "<:ann:1538640733404143826>",
+        "search": "<:search:1538640773690560635>"
+},
+    "prefix": "+"
+}
