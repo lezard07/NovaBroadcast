@@ -93,6 +93,7 @@ Edit `config.json` before starting:
 | `guildId` | Your server ID |
 | `broadcastRoleId` | Only members with this role can use the broadcast |
 | `reportChannelId` | Channel where the post-broadcast report is sent |
+| `emojis` | Your emojis ID |
 
 ### Running
 
