@@ -103,7 +103,7 @@ npm start
 
 ---
 
-## 📖 Usage
+## Usage
 
 ### `/hh` or `+hh`
 Opens the main control panel with all commands as buttons.
@@ -141,7 +141,7 @@ novabroadcast/
 
 ---
 
-## 💬 Support
+## Support
 
 Join our Discord server for help, updates, and more:  
 **[discord.gg/XrEGeZQFDP](https://discord.gg/XrEGeZQFDP)**
