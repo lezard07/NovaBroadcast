@@ -116,7 +116,7 @@ Shows available commands and system info.
 1. Use `/cp` or `+cp` to open the control panel
 2. Click **Broadcast**
 3. Type your message in the modal
-4. Choose message type: **📄 Normal** or **Embed**
+4. Choose message type: **Normal** or **Embed**
 5. Select your target: **All Members**, **Online**, or **Offline**
 6. Confirm — the broadcast starts immediately
 
