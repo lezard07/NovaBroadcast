@@ -105,7 +105,7 @@ npm start
 
 ## Usage
 
-### `/hh` or `+hh`
+### `/cp` or `+cp`
 Opens the main control panel with all commands as buttons.
 
 ### `/help` or `+help`
