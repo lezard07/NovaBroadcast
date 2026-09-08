@@ -13,9 +13,7 @@ module.exports = {
     async run(message) {
         const engine = require('../../core/BroadcastEngine');
 
-        if (!message.member.roles.cache.has(config.server.bcRoleId)) {
-            return message.reply({ content: '❌ You do not have the required role.' });
-        }
+        if (!message.member?.roles?.cache?.has(config.server.bcRoleId)) return;
 
         const clients = engine.clients;
 
