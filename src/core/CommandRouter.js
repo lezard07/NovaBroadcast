@@ -196,6 +196,15 @@ class CommandRouter {
                                     .setPlaceholder('e.g. NovaCodes™ Broadcast • 2026')
                                     .setMaxLength(256)
                                     .setRequired(false)
+                            ),
+                            new ActionRowBuilder().addComponents(
+                                new TextInputBuilder()
+                                    .setCustomId('embed_link')
+                                    .setLabel('Button Link (optional)')
+                                    .setStyle(TextInputStyle.Short)
+                                    .setPlaceholder('e.g. https://discord.gg/z77Akyq2EE')
+                                    .setMaxLength(512)
+                                    .setRequired(false)
                             )
                         )
                 );
@@ -237,10 +246,15 @@ class CommandRouter {
             }
 
             if (interaction.customId === 'modal_embed_opts') {
-                const userId     = interaction.user.id;
-                const embedTitle = interaction.fields.getTextInputValue('embed_title').trim();
+                const userId      = interaction.user.id;
+                const embedTitle  = interaction.fields.getTextInputValue('embed_title').trim();
                 const embedFooter = interaction.fields.getTextInputValue('embed_footer').trim() || null;
-                const embedColor = config.colors.main;
+                const embedLink   = interaction.fields.getTextInputValue('embed_link').trim() || null;
+                const embedColor  = config.colors.main;
+
+                if (embedLink && !/^https?:\/\/.+/.test(embedLink)) {
+                    return interaction.reply({ content: '❌ Invalid link. Must start with `https://` or `http://`.', flags: MessageFlags.Ephemeral });
+                }
 
                 const broadcastText = this.getBroadcastText(userId);
                 if (!broadcastText)
@@ -252,7 +266,8 @@ class CommandRouter {
                     msgType:    'embed',
                     embedTitle,
                     embedColor,
-                    embedFooter
+                    embedFooter,
+                    embedLink
                 });
 
                 await interaction.deferUpdate();
@@ -260,7 +275,7 @@ class CommandRouter {
                     components: [this.buildBcPanel(broadcastText, 'embed', interaction.guild)],
                     flags: MessageFlags.IsComponentsV2
                 });
-                logger.info(`Embed opts set by ${interaction.user.tag}: "${embedTitle}" footer="${embedFooter}"`);
+                logger.info(`Embed opts set by ${interaction.user.tag}: "${embedTitle}" footer="${embedFooter}" link="${embedLink}"`);
                 return;
             }
 
@@ -326,10 +341,11 @@ class CommandRouter {
 
         const savedText    = text;
         const savedMembers = session.targetMembers;
-        const savedType    = session.msgType    || 'normal';
-        const embedTitle   = session.embedTitle || null;
-        const embedColor   = session.embedColor || config.colors.main;
+        const savedType    = session.msgType     || 'normal';
+        const embedTitle   = session.embedTitle  || null;
+        const embedColor   = session.embedColor  || config.colors.main;
         const embedFooter  = session.embedFooter || null;
+        const embedLink    = session.embedLink   || null;
         this.clearBroadcastSession(userId);
 
         await engine.startBroadcast({
@@ -339,7 +355,8 @@ class CommandRouter {
             msgType: savedType,
             embedTitle,
             embedColor,
-            embedFooter
+            embedFooter,
+            embedLink
         });
     }
 }
