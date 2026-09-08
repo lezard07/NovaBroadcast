@@ -79,6 +79,23 @@ const initClients = async () => {
     logger.info(`${clients.length} client(s) ready`);
 };
 
+const hasBcPermission = async (guild, member, userId) => {
+    if (!guild || guild.id !== config.server.guildId) return false;
+    let targetMember = member;
+    if (!targetMember && guild && userId) {
+        targetMember = await guild.members.fetch(userId).catch(() => null);
+    }
+    if (!targetMember) return false;
+
+    if (targetMember.roles?.cache) {
+        return targetMember.roles.cache.has(config.server.bcRoleId);
+    }
+    if (Array.isArray(targetMember.roles)) {
+        return targetMember.roles.includes(config.server.bcRoleId);
+    }
+    return false;
+};
+
 const attachListeners = (client) => {
     client.once('ready', () => {
         logger.info(`Ready: ${client.user.tag}`);
@@ -100,6 +117,9 @@ const attachListeners = (client) => {
         if (msg.author.bot) return;
         if (!msg.content.startsWith(PREFIX)) return;
 
+        const authorized = await hasBcPermission(msg.guild, msg.member, msg.author?.id);
+        if (!authorized) return;
+
         const args    = msg.content.slice(PREFIX.length).trim().split(/\s+/);
         const command = args.shift().toLowerCase();
         const cmd = prefixCommands.get(command);
@@ -111,6 +131,9 @@ const attachListeners = (client) => {
 
     client.on('interactionCreate', async (interaction) => {
         if (clients[0] && client !== clients[0]) return;
+
+        const authorized = await hasBcPermission(interaction.guild, interaction.member, interaction.user?.id);
+        if (!authorized) return;
 
         if (interaction.isChatInputCommand()) {
             const cmd = slashCommands.get(interaction.commandName);
