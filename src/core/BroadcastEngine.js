@@ -1,6 +1,9 @@
 const {
     MessageFlags,
-    EmbedBuilder
+    EmbedBuilder,
+    ActionRowBuilder,
+    ButtonBuilder,
+    ButtonStyle
 } = require('discord.js');
 
 const config = require('../../config');
@@ -59,7 +62,7 @@ class BroadcastEngine {
         return chunks;
     }
 
-    _buildPayload(message, msgType, embedTitle, embedColor, embedFooter, guild) {
+    _buildPayload(message, msgType, embedTitle, embedColor, embedFooter, guild, embedLink = null) {
         if (msgType === 'embed') {
             const color = parseInt((embedColor || config.colors.main).replace('#', ''), 16);
             const embed = new EmbedBuilder()
@@ -76,12 +79,25 @@ class BroadcastEngine {
                 embed.setFooter({ text: embedFooter });
             }
 
-            return { embeds: [embed] };
+            const payload = { embeds: [embed] };
+
+            if (embedLink) {
+                payload.components = [
+                    new ActionRowBuilder().addComponents(
+                        new ButtonBuilder()
+                            .setLabel('Link')
+                            .setURL(embedLink)
+                            .setStyle(ButtonStyle.Link)
+                    )
+                ];
+            }
+
+            return payload;
         }
         return { content: message };
     }
 
-    async startBroadcast({ interaction, members, message, msgType = 'normal', embedTitle = null, embedColor = null, embedFooter = null }) {
+    async startBroadcast({ interaction, members, message, msgType = 'normal', embedTitle = null, embedColor = null, embedFooter = null, embedLink = null }) {
         const totalMembers = members.size;
         const valid        = this.clients.filter(c => c?.user?.id);
         const clientCount  = valid.length;
@@ -121,14 +137,14 @@ class BroadcastEngine {
         const chunks = this._distribute([...members.values()], clientCount);
 
         await Promise.all(chunks.map((chunk, i) =>
-            this._processChunk({ client: valid[i % clientCount], chunk, message, results, interaction, msgType, embedTitle, embedColor, embedFooter })
+            this._processChunk({ client: valid[i % clientCount], chunk, message, results, interaction, msgType, embedTitle, embedColor, embedFooter, embedLink })
         ));
 
         logger.info(`Broadcast done — ✅ ${results.successCount}  ❌ ${results.failureCount}`);
-        return this._finalize({ interaction, results, message, msgType, embedFooter });
+        return this._finalize({ interaction, results, message, msgType, embedFooter, embedLink });
     }
 
-    async _processChunk({ client, chunk, message, results, interaction, msgType, embedTitle, embedColor, embedFooter }) {
+    async _processChunk({ client, chunk, message, results, interaction, msgType, embedTitle, embedColor, embedFooter, embedLink }) {
         if (!client?.user) {
             chunk.forEach(() => { results.failureCount++; results.processedCount++; });
             return;
@@ -147,7 +163,7 @@ class BroadcastEngine {
                 if (!user) throw Object.assign(new Error('Cannot fetch user'), { code: -1 });
 
                 const guild   = member.guild;
-                const payload = this._buildPayload(message, msgType, embedTitle, embedColor, embedFooter, guild);
+                const payload = this._buildPayload(message, msgType, embedTitle, embedColor, embedFooter, guild, embedLink);
                 await user.send(payload);
                 results.successCount++;
             } catch (e) {
@@ -199,7 +215,7 @@ class BroadcastEngine {
         ));
     }
 
-    async _finalize({ interaction, results, message, msgType = 'normal', embedFooter = null }) {
+    async _finalize({ interaction, results, message, msgType = 'normal', embedFooter = null, embedLink = null }) {
         const elapsed   = Date.now() - results.startTime;
         const avgSpeed  = Math.round(results.totalMembers / (elapsed / 1000));
         const pct       = Math.floor(results.successCount / results.totalMembers * 100);
@@ -212,7 +228,7 @@ class BroadcastEngine {
             try {
                 const ch = await this.clients[0].channels.fetch(config.server.reportChannelId);
                 if (ch) await ch.send({
-                    components: [this._reportContainer(results, message, msgType, embedFooter, guild)],
+                    components: [this._reportContainer(results, message, msgType, embedFooter, embedLink, guild)],
                     flags: MessageFlags.IsComponentsV2
                 });
             } catch (e) { logger.error(`Report channel failed: ${e.message}`); }
@@ -236,7 +252,7 @@ class BroadcastEngine {
         return results;
     }
 
-    _reportContainer(results, message, msgType = 'normal', embedFooter = null, guild = null) {
+    _reportContainer(results, message, msgType = 'normal', embedFooter = null, embedLink = null, guild = null) {
         const preview   = message.length > 200 ? message.slice(0, 200) + '…' : message;
         const pct       = Math.floor(results.successCount / results.totalMembers * 100);
         const typeLabel = msgType === 'embed' ? `${config.emojis.emmsg} Embed` : `${config.emojis.msg} Normal`;
@@ -257,6 +273,11 @@ class BroadcastEngine {
         if (embedFooter) {
             container.addSeparatorComponents(sep());
             container.addTextDisplayComponents(txt(`**Footer:** ${embedFooter}`));
+        }
+
+        if (embedLink) {
+            container.addSeparatorComponents(sep());
+            container.addTextDisplayComponents(txt(`**Link Button:** ${embedLink}`));
         }
 
         if (results.failedMembers.length) {
