@@ -11,12 +11,7 @@ module.exports = {
     async run(interaction) {
         const engine = require('../../core/BroadcastEngine');
 
-        if (!interaction.member.roles.cache.has(config.server.bcRoleId)) {
-            return interaction.reply({
-                content: '❌ You do not have the required role.',
-                flags: MessageFlags.Ephemeral
-            });
-        }
+        if (!interaction.member?.roles?.cache?.has(config.server.bcRoleId)) return;
 
         await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
