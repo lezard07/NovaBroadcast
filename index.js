@@ -154,7 +154,7 @@ process.on('unhandledRejection', (r) => logger.error('UnhandledRejection:', r));
 │          ────────────────────────────────────────────────────────           │
 │                   🤖 BOTS     : ${String(bots).padEnd(35)}         │
 │                   ⚡ SPEED    : ~${String(speed).padEnd(34)}         │   
-│                   📨 PREFIX   : ${PREFIX}cp │ ${PREFIX}help │ ${PREFIX}join │ ${PREFIX}left                  │
+│                   📨 PREFIX   : ${PREFIX}cp │ ${PREFIX}help │ ${PREFIX}join │ ${PREFIX}left                 │
 │                   🔷 SLASH    : /cp │ /help │ /join │ /left                 │
 │                   💻 ENGINE   : discord.js v14                              │   
 │                                                                             │
