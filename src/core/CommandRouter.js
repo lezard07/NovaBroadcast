@@ -82,6 +82,7 @@ class CommandRouter {
                 new ButtonBuilder().setCustomId('target_all').setEmoji(config.emojis.members).setLabel('All Members').setStyle(ButtonStyle.Secondary),
                 new ButtonBuilder().setCustomId('target_online').setEmoji(config.emojis.online).setLabel('Online').setStyle(ButtonStyle.Secondary),
                 new ButtonBuilder().setCustomId('target_offline').setEmoji(config.emojis.offline).setLabel('Offline').setStyle(ButtonStyle.Secondary),
+                new ButtonBuilder().setCustomId('target_person').setEmoji('config.emojis.personne').setLabel('Personne').setStyle(ButtonStyle.Secondary),
                 new ButtonBuilder().setCustomId('bc_cancel').setEmoji(config.emojis.cancel).setLabel('Cancel').setStyle(ButtonStyle.Danger)
             )
         );
@@ -208,6 +209,25 @@ class CommandRouter {
                 );
             }
 
+            if (id === 'target_person') {
+                return interaction.showModal(
+                    new ModalBuilder()
+                        .setCustomId('modal_target_person')
+                        .setTitle('Personne')
+                        .addComponents(
+                            new ActionRowBuilder().addComponents(
+                                new TextInputBuilder()
+                                    .setCustomId('person_user')
+                                    .setLabel('User (ID, Username, or Tag)')
+                                    .setStyle(TextInputStyle.Short)
+                                    .setPlaceholder('Enter User ID or Username...')
+                                    .setMaxLength(100)
+                                    .setRequired(true)
+                            )
+                        )
+                );
+            }
+
             if (id.startsWith('target_')) {
                 await this._handleTargetSelect(interaction, id.replace('target_', ''), broadcastText);
                 return;
@@ -275,6 +295,141 @@ class CommandRouter {
                 });
                 logger.info(`Embed opts set by ${interaction.user.tag}: "${embedTitle}" footer="${embedFooter}" link="${embedLink}"`);
                 return;
+            }
+
+            if (interaction.customId === 'modal_target_person') {
+                const userId = interaction.user.id;
+                const broadcastText = this.getBroadcastText(userId);
+                if (!broadcastText) {
+                    return interaction.reply({ content: '❌ Session expired. Please start over.', flags: MessageFlags.Ephemeral });
+                }
+
+                await interaction.deferReply({ flags: MessageFlags.Ephemeral });
+
+                const input = interaction.fields.getTextInputValue('person_user').trim();
+                const cleanId = input.replace(/[<@!>]/g, '');
+
+                let targetMember = null;
+                if (/^\d{17,20}$/.test(cleanId)) {
+                    targetMember = await interaction.guild.members.fetch(cleanId).catch(() => null);
+                }
+
+                if (!targetMember) {
+                    try {
+                        const searchResults = await interaction.guild.members.search({ query: input, limit: 5 });
+                        if (searchResults?.size > 0) {
+                            targetMember = searchResults.find(m =>
+                                m.user.username.toLowerCase() === input.toLowerCase() ||
+                                m.user.tag.toLowerCase() === input.toLowerCase() ||
+                                m.displayName.toLowerCase() === input.toLowerCase()
+                            ) || searchResults.first();
+                        }
+                    } catch (e) {
+                        logger.debug(`Member search failed: ${e.message}`);
+                    }
+                }
+
+                if (!targetMember) {
+                    targetMember = interaction.guild.members.cache.find(m =>
+                        m.id === cleanId ||
+                        m.user.username.toLowerCase() === input.toLowerCase() ||
+                        m.user.tag.toLowerCase() === input.toLowerCase() ||
+                        m.displayName.toLowerCase() === input.toLowerCase()
+                    );
+                }
+
+                if (!targetMember) {
+                    return interaction.editReply({
+                        components: [buildContainer(config.colors.error,
+                            headerSection(interaction.guild, `**## ${config.emojis.dot} User Not Found**`, `- This user not found in the server. Please ensure you entered a valid User ID, Username, or Tag.`),
+                            sep()
+                        )],
+                        flags: MessageFlags.IsComponentsV2
+                    });
+                }
+
+                if (targetMember.user.bot) {
+                    return interaction.editReply({
+                        components: [buildContainer(config.colors.error,
+                            headerSection(interaction.guild, `**## ${config.emojis.dot} Invalid User**`, `- Cannot send a direct message to a bot.`),
+                            sep()
+                        )],
+                        flags: MessageFlags.IsComponentsV2
+                    });
+                }
+
+                const session     = this.getSession(userId) || {};
+                const msgType     = session.msgType || 'normal';
+                const embedTitle  = session.embedTitle || null;
+                const embedColor  = session.embedColor || config.colors.main;
+                const embedFooter = session.embedFooter || null;
+                const embedLink   = session.embedLink || null;
+
+                const payload = engine._buildPayload(
+                    broadcastText,
+                    msgType,
+                    embedTitle,
+                    embedColor,
+                    embedFooter,
+                    interaction.guild,
+                    embedLink
+                );
+
+                let sent = false;
+                let sendError = null;
+
+                try {
+                    await targetMember.send(payload);
+                    sent = true;
+                } catch (err) {
+                    if (engine.clients?.length > 1) {
+                        for (const secClient of engine.clients.slice(1)) {
+                            try {
+                                const u = secClient.users.cache.get(targetMember.id) ?? await secClient.users.fetch(targetMember.id).catch(() => null);
+                                if (u) {
+                                    await u.send(payload);
+                                    sent = true;
+                                    break;
+                                }
+                            } catch (e2) {}
+                        }
+                    }
+                    if (!sent) sendError = err.message;
+                }
+
+                if (sent) {
+                    this.clearBroadcastSession(userId);
+
+                    if (interaction.message?.editable) {
+                        await interaction.message.edit({
+                            components: [buildContainer(config.colors.success,
+                                headerSection(interaction.guild, `**## ${config.emojis.dot} Message Delivered**`, `- The broadcast message has been sent successfully to **${targetMember.user.tag}** (<@${targetMember.id}>).`),
+                                sep(false),
+                                txt(`**${config.emojis.right} Recipient:** ${targetMember.user.tag} (\`${targetMember.id}\`)\n**${config.emojis.less} Type:** ${msgType === 'embed' ? 'Embed' : 'Normal'}`),
+                                sep()
+                            )],
+                            flags: MessageFlags.IsComponentsV2
+                        }).catch(() => null);
+                    }
+
+                    return interaction.editReply({
+                        components: [buildContainer(config.colors.success,
+                            headerSection(interaction.guild, `**## ${config.emojis.dot} Message Sent**`, `- Message successfully sent to **${targetMember.user.tag}** (<@${targetMember.id}>)!`),
+                            sep()
+                        )],
+                        flags: MessageFlags.IsComponentsV2
+                    });
+                } else {
+                    return interaction.editReply({
+                        components: [buildContainer(config.colors.error,
+                            headerSection(interaction.guild, `**## ${config.emojis.dot} Delivery Failed**`, `- Could not send message to **${targetMember.user.tag}** (<@${targetMember.id}>). Their DMs may be closed or the bot is blocked.`),
+                            sep(false),
+                            txt(`**${config.emojis.right} Recipient:** ${targetMember.user.tag} (\`${targetMember.id}\`)\n**${config.emojis.less} Error:** ${sendError || 'DMs closed'}`),
+                            sep()
+                        )],
+                        flags: MessageFlags.IsComponentsV2
+                    });
+                }
             }
 
         } catch (e) { logger.error(`handleModal: ${e.message}`, e); }
