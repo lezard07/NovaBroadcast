@@ -111,6 +111,9 @@ Opens the main control panel with all commands as buttons.
 ### `/help` or `+help`
 Shows available commands and system info.
 
+### `/add` or `+add`
+Add your bot in one click.
+
 ### How to broadcast
 
 1. Use `/cp` or `+cp` to open the control panel
