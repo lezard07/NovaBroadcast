@@ -58,7 +58,6 @@ class CommandRouter {
         const preview = text.length > MAX_PREV_LEN ? text.slice(0, MAX_PREV_LEN) + '…' : text;
         return buildContainer(config.colors.main,
             headerSection(guild, `**## ${config.emojis.dot} Choose Message Type**`, '- Choose how you want to deliver your broadcast message. You can send it as a simple normal text message that appears clean and direct in the member\'s DMs, or as a rich embed with a custom title, accent color, and formatted layout for a more professional and eye-catching appearance.'),
-            sep(false),
             txt(`**${config.emojis.right} Message Preview**\n\`\`\`${preview}\`\`\``),
             sep(),
             new ActionRowBuilder().addComponents(
@@ -74,15 +73,13 @@ class CommandRouter {
         const typeLabel = msgType === 'embed' ? `${config.emojis.emmsg} Embed` : `${config.emojis.msg} Normal`;
         return buildContainer(config.colors.main,
             headerSection(guild, `**## ${config.emojis.dot} Broadcast Control**`, '- Choose which members will receive your broadcast. You can target __all members__ in the server, only those currently __online (including idle and do-not-disturb)__, or only __offline members__. Review your message preview and broadcast settings below before proceeding to confirmation.'),
-            sep(false),
-            txt(`**${config.emojis.right} Message Preview**\n\`\`\`${preview}\`\`\``),
-            txt(`**${config.emojis.less} Info:** ${text.length} / ${MAX_BC_LEN} chars · Type: **${typeLabel}**`),
+            txt(`**${config.emojis.right} Message Preview**\n\`\`\`${preview}\`\`\`\n**${config.emojis.less} Info:** ${text.length} / ${MAX_BC_LEN} chars · Type: **${typeLabel}**`),
             sep(),
             new ActionRowBuilder().addComponents(
                 new ButtonBuilder().setCustomId('target_all').setEmoji(config.emojis.members).setLabel('All Members').setStyle(ButtonStyle.Secondary),
                 new ButtonBuilder().setCustomId('target_online').setEmoji(config.emojis.online).setLabel('Online').setStyle(ButtonStyle.Secondary),
                 new ButtonBuilder().setCustomId('target_offline').setEmoji(config.emojis.offline).setLabel('Offline').setStyle(ButtonStyle.Secondary),
-                new ButtonBuilder().setCustomId('target_person').setEmoji('config.emojis.personne').setLabel('Personne').setStyle(ButtonStyle.Secondary),
+                new ButtonBuilder().setCustomId('target_person').setEmoji(config.emojis.person).setLabel('Personne').setStyle(ButtonStyle.Secondary),
                 new ButtonBuilder().setCustomId('bc_cancel').setEmoji(config.emojis.cancel).setLabel('Cancel').setStyle(ButtonStyle.Danger)
             )
         );
@@ -93,9 +90,7 @@ class CommandRouter {
         const typeLabel = msgType === 'embed' ? `${config.emojis.emmsg} Embed` : `${config.emojis.msg} Normal`;
         return buildContainer(config.colors.main,
             headerSection(guild, `**## ${config.emojis.dot} Broadcast Control**`, '- Double-check everything before launching. Review your message preview, confirm the target audience and member count, and verify the message type. Once you click Confirm, the broadcast will begin immediately and cannot be stopped. Make sure all details are correct before proceeding.'),
-            sep(false),
-            txt(`**${config.emojis.right} Message Preview**\n\`\`\`${preview}\`\`\``),
-            txt(`**${config.emojis.right} Target:** ${targetLabel} — **${count}** members · Type: **${typeLabel}**`),
+            txt(`**${config.emojis.right} Message Preview**\n\`\`\`${preview}\`\`\`\n**${config.emojis.right} Target:** ${targetLabel} — **${count}** members · Type: **${typeLabel}**`),
             sep(),
             new ActionRowBuilder().addComponents(
                 new ButtonBuilder().setCustomId('bc_confirm').setEmoji(config.emojis.done).setLabel('Confirm').setStyle(ButtonStyle.Success),
@@ -341,7 +336,7 @@ class CommandRouter {
                 if (!targetMember) {
                     return interaction.editReply({
                         components: [buildContainer(config.colors.error,
-                            headerSection(interaction.guild, `**## ${config.emojis.dot} User Not Found**`, `- This user not found in the server. Please ensure you entered a valid User ID, Username, or Tag.`),
+                            headerSection(interaction.guild, `**## ${config.emojis.dot} User Not Found**`, `- Please check the server and enter the correct user.`),
                             sep()
                         )],
                         flags: MessageFlags.IsComponentsV2
@@ -403,7 +398,7 @@ class CommandRouter {
                     if (interaction.message?.editable) {
                         await interaction.message.edit({
                             components: [buildContainer(config.colors.success,
-                                headerSection(interaction.guild, `**## ${config.emojis.dot} Message Delivered**`, `- The broadcast message has been sent successfully to **${targetMember.user.tag}** (<@${targetMember.id}>).`),
+                                headerSection(interaction.guild, `**## ${config.emojis.dot} Message Delivered**`, `- The broadcast message has been sent successfully to **${targetMember.user.tag}** (<@${targetMember.id}>). The recipient has been notified, and the broadcast process has been completed successfully.`),
                                 sep(false),
                                 txt(`**${config.emojis.right} Recipient:** ${targetMember.user.tag} (\`${targetMember.id}\`)\n**${config.emojis.less} Type:** ${msgType === 'embed' ? 'Embed' : 'Normal'}`),
                                 sep()
