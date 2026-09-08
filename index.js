@@ -152,10 +152,10 @@ process.on('unhandledRejection', (r) => logger.error('UnhandledRejection:', r));
 │                   STATUS       : ONLINE                                     │
 │                   SYSTEM       : BROADCAST v3.0                             │
 │          ────────────────────────────────────────────────────────           │
-│                   🤖 BOTS     : ${String(bots).padEnd(35)}                  │
-│                   ⚡ SPEED    : ~${String(speed).padEnd(34)}                │   
-│                   📨 PREFIX   : ${PREFIX} │ ${PREFIX}help                   │
-│                   🔷 SLASH    : /cp │ /help                                 │
+│                   🤖 BOTS     : ${String(bots).padEnd(35)}         │
+│                   ⚡ SPEED    : ~${String(speed).padEnd(34)}         │   
+│                   📨 PREFIX   : ${PREFIX}cp │ ${PREFIX}help │ ${PREFIX}join │ ${PREFIX}left                  │
+│                   🔷 SLASH    : /cp │ /help │ /join │ /left                 │
 │                   💻 ENGINE   : discord.js v14                              │   
 │                                                                             │
 │                   [ NovaCodes™ ] :: BROADCAST CORE ACTIVE                   │   
