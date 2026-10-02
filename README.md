@@ -48,7 +48,7 @@ Edit `config.json` before starting:
           ""
         ],
     "activity": {
-        "name": "Powered By NovaCodes™",
+        "name": "Powered By Nova Realm™",
         "type": "STREAMING",
         "url": "https://www.twitch.tv/nochannel",
         "status": "idle"
