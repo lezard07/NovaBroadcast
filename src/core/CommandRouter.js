@@ -125,7 +125,7 @@ class CommandRouter {
                 );
             }
 
-            if (id === 'cp_NovaCodes') {
+            if (id === 'cp_Nova_Realm') {
                 if (interaction.guild?.id !== config.server.guildId) return;
                 await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
@@ -187,7 +187,7 @@ class CommandRouter {
                                     .setCustomId('embed_footer')
                                     .setLabel('Footer Text (optional)')
                                     .setStyle(TextInputStyle.Short)
-                                    .setPlaceholder('e.g. NovaCodes™ Broadcast • 2026')
+                                    .setPlaceholder('e.g. Nova Realm™ Broadcast • 2026')
                                     .setMaxLength(256)
                                     .setRequired(false)
                             ),
