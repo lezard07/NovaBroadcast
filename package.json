@@ -1,12 +1,12 @@
 {
-  "name": "NovaCodes™-bc",
+  "name": "Nova-Realm-bc",
   "version": "3.0.0",
   "main": "index.js",
   "scripts": {
     "start": "node index.js"
   },
   "keywords": ["discord", "broadcast", "multi-client"],
-  "author": "NovaCodes™",
+  "author": "Nova Realm™",
   "license": "MIT",
   "description": "Advanced Discord broadcast system with multi-client support",
   "dependencies": {
