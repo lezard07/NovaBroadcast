@@ -141,7 +141,7 @@ novabroadcast/
 │   │   ├── CommandRouter.js     # Button/modal handler
 │   │   └── Toolkit.js           # Shared utilities
 │   └── events/
-│       └── ready.js # Type Status
+│       └── ready.js # Bot Status Type
 ├── config.json
 ├── package.json
 └── index.js
