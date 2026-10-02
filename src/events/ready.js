@@ -16,11 +16,11 @@ module.exports = {
 
                 activities: [
                     {
-                        name: config.bot.activity.name || 'NovaCodes™',
+                        name: config.bot.activity.name || 'Nova Realm™',
                         type: ActivityType.Streaming,
                         url:
                             config.bot.activity.url ||
-                            'https://www.twitch.tv/novacodes'
+                            'https://www.twitch.tv/Nova_Realm'
                     }
                 ]
             });
