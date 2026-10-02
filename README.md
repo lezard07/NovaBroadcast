@@ -136,10 +136,12 @@ novabroadcast/
 │   ├── commands/
 │   │   ├── prefix/       # +cp, +help
 │   │   └── slash/        # /cp, /help
-│   └── core/
-│       ├── BroadcastEngine.js   # DM sending logic
-│       ├── CommandRouter.js     # Button/modal handler
-│       └── Toolkit.js           # Shared utilities
+│   ├── core/
+│   │   ├── BroadcastEngine.js   # DM sending logic
+│   │   ├── CommandRouter.js     # Button/modal handler
+│   │   └── Toolkit.js           # Shared utilities
+│   └── events/
+│       └── ready.js # Type Status
 ├── config.json
 ├── package.json
 └── index.js
