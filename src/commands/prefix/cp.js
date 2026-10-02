@@ -33,7 +33,7 @@ module.exports = {
                     .setLabel('Broadcast')
                     .setStyle(ButtonStyle.Secondary),
                 new ButtonBuilder()
-                    .setCustomId('cp_NovaCodes')
+                    .setCustomId('cp_Nova_Realm')
                     .setEmoji(e.search)
                     .setLabel('Status')
                     .setStyle(ButtonStyle.Secondary)
