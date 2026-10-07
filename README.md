@@ -1,4 +1,4 @@
-# NovaBroadcast v3.0
+# NovaBroadcast v1.0
 
 Advanced multi-client Discord broadcast system built with discord.js v14.  
 Send DM broadcasts to your server members — fast, clean, and fully button-driven.
