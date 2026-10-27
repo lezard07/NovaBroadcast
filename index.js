@@ -8,6 +8,8 @@ config.bot.tokens = config.bot.tokens.filter(t => t && !t.startsWith('TOKEN_'));
 const { createLogger } = require('./src/core/Toolkit');
 const router = require('./src/core/CommandRouter');
 
+const { loginWithRetry } = require('./src/core/Connection');
+
 const logger = createLogger('Main');
 const PREFIX = config.prefix;
 
@@ -116,6 +118,7 @@ const initClients = async () => {
         }
 
         const client = new Client({
+            ws: { handshakeTimeout: 60_000, helloTimeout: 60_000, readyTimeout: 60_000 },
             intents: [
                 GatewayIntentBits.Guilds,
                 GatewayIntentBits.GuildMessages,
@@ -132,7 +135,7 @@ const initClients = async () => {
         attachListeners(client);
 
         try {
-            await client.login(token);
+            await loginWithRetry(client, token, logger);
 
             clients.push(client);
 
@@ -141,7 +144,7 @@ const initClients = async () => {
             );
         } catch (e) {
             logger.error(
-                `Login failed for ${token.slice(0, 8)}...: ${e.message}`
+                `Login failed for bot #${config.bot.tokens.indexOf(token) + 1}: ${e.message}`
             );
         }
     }
@@ -193,6 +196,14 @@ const attachListeners = (client) => {
 
     client.on('error', (e) => {
         logger.error(`[${client.user?.tag}] error:`, e);
+    });
+
+    client.on('shardError', (error, shardId) => {
+        logger.warn('Gateway shard ' + shardId + ' connection error: ' + error.message);
+    });
+
+    client.on('shardReconnecting', (shardId) => {
+        logger.warn('Gateway shard ' + shardId + ' reconnecting...');
     });
 
     client.on('warn', (w) => {
